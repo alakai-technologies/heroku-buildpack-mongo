@@ -18,7 +18,7 @@ warnings=$(mktemp)
 
 
 
-mongo_version="4.2.25"
+mongo_version="4.2.3"
 # Install mongodb to use mongo commands
 echo "-----> Downloading and installing mongodb version ${mongo_version}..."
 [[ $STACK = "heroku-16" ]] && os_id="ubuntu1604" || os_id="ubuntu1804"
