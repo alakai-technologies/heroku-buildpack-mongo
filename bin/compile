@@ -17,16 +17,14 @@ mkdir -p $heroku_dir/mongo
 warnings=$(mktemp)
 
 mongo_version="7.0.5"
-# Install mongodb to use mongo commands
-echo "-----> Downloading and installing mongodb version ${mongo_version}..."
-if [[ $STACK == "heroku-18" ]]; then
-    os_id="ubuntu1804"
-elif [[ $STACK == "heroku-20" ]]; then
-    os_id="ubuntu2004"
-else
-    echo "Unsupported stack: $STACK"
-    exit 1
-fi
+# Extract the version number from the $STACK variable
+stack_version=${STACK#*-}
+
+# Construct the os_id using the extracted version number
+os_id="ubuntu${stack_version}04"
+
+# Echo the os_id for debugging
+echo "Determined OS ID: $os_id"
 
 file_name="mongodb-linux-x86_64-${os_id}-${mongo_version}.tgz"
 folder_name=`echo "$file_name" | sed 's/\.tgz$//'`
