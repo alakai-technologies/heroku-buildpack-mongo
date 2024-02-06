@@ -16,32 +16,19 @@ heroku_dir=$build_dir/.heroku
 mkdir -p $heroku_dir/mongo
 warnings=$(mktemp)
 
-mongo_version="5.0.0"
+mongo_version="4.2.3"
 # Install mongodb to use mongo commands
-echo "-----> Downloading and installing MongoDB version ${mongo_version}..."
+echo "-----> Downloading and installing mongodb version ${mongo_version}..."
 [[ $STACK = "heroku-16" ]] && os_id="ubuntu1604" || os_id="ubuntu1804"
 
 file_name="mongodb-linux-x86_64-${os_id}-${mongo_version}.tgz"
-folder_name=$(echo "$file_name" | sed 's/\.tgz$//')
+folder_name=`echo "$file_name" | sed 's/\.tgz$//'`
 download_url="https://fastdl.mongodb.org/linux/${file_name}"
-curl $download_url -s -o /tmp/mongodb.tgz
+curl $download_url -s -o - | tar xzf - -C /tmp
 
-# Check if the MongoDB binary was downloaded
-if [ ! -f /tmp/mongodb.tgz ]; then
-    echo "Error: Failed to download MongoDB binary."
-    exit 1
-fi
-
-# Extract MongoDB binary
-tar xzf /tmp/mongodb.tgz -C /tmp
-
-# Move MongoDB binaries into the app directory
+# Move mongodb binaries into the app directory
 mv "/tmp/${folder_name}"/* $heroku_dir/mongo
 chmod +x $heroku_dir/mongo/bin/*
-
-# Clean up temporary files
-rm -rf "/tmp/${folder_name}"
-rm /tmp/mongodb.tgz
 
 echo "-----> Creating runtime environment"
 mkdir -p $build_dir/.profile.d
