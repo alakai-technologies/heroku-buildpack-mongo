@@ -19,7 +19,14 @@ warnings=$(mktemp)
 mongo_version="7.0.5"
 # Install mongodb to use mongo commands
 echo "-----> Downloading and installing mongodb version ${mongo_version}..."
-[[ $STACK = "heroku-16" ]] && os_id="ubuntu1604" || os_id="ubuntu1804"
+if [[ $STACK == "heroku-18" ]]; then
+    os_id="ubuntu1804"
+elif [[ $STACK == "heroku-20" ]]; then
+    os_id="ubuntu2004"
+else
+    echo "Unsupported stack: $STACK"
+    exit 1
+fi
 
 file_name="mongodb-linux-x86_64-${os_id}-${mongo_version}.tgz"
 folder_name=`echo "$file_name" | sed 's/\.tgz$//'`
