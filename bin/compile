@@ -16,7 +16,7 @@ heroku_dir=$build_dir/.heroku
 mkdir -p $heroku_dir/mongo
 warnings=$(mktemp)
 
-mongo_version="7.0.5"
+mongo_version="4.2.3"
 # Extract the version number from the $STACK variable
 stack_version=${STACK#*-}
 
