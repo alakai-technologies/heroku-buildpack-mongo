@@ -16,25 +16,39 @@ heroku_dir=$build_dir/.heroku
 mkdir -p $heroku_dir/mongo
 warnings=$(mktemp)
 
+# Update MongoDB version to a later version (e.g., 5.0.0 or higher)
+mongo_version="5.0.0"
 
-
-mongo_version="4.2.3"
-# Install mongodb to use mongo commands
-echo "-----> Downloading and installing mongodb version ${mongo_version}..."
-[[ $STACK = "heroku-16" ]] && os_id="ubuntu1604" || os_id="ubuntu1804"
+# Determine OS based on Heroku stack
+if [[ $STACK == "heroku-18" ]]; then
+    os_id="ubuntu1804"
+elif [[ $STACK == "heroku-20" ]]; then
+    os_id="ubuntu2004"
+elif [[ $STACK == "heroku-22" ]]; then
+    os_id="ubuntu2204"
+else
+    echo "Unsupported stack: $STACK"
+    exit 1
+fi
 
 # Echo the os_id for debugging
 echo "Determined OS ID: $os_id"
 
 file_name="mongodb-linux-x86_64-${os_id}-${mongo_version}.tgz"
-folder_name=`echo "$file_name" | sed 's/\.tgz$//'`
+folder_name=$(echo "$file_name" | sed 's/\.tgz$//')
 download_url="https://fastdl.mongodb.org/linux/${file_name}"
-curl $download_url -s -o - | tar xzf - -C /tmp
 
-# Move mongodb binaries into the app directory
+# Download and extract MongoDB binaries
+curl -f -s -o /tmp/mongodb.tgz "${download_url}" || { echo "Download failed! Exiting."; exit 1; }
+tar xzf /tmp/mongodb.tgz -C /tmp || { echo "Extraction failed! Exiting."; exit 1; }
+
+# Move MongoDB binaries into the app directory
 mv "/tmp/${folder_name}"/* $heroku_dir/mongo
 chmod +x $heroku_dir/mongo/bin/*
 
 echo "-----> Creating runtime environment"
 mkdir -p $build_dir/.profile.d
 echo "export PATH=\"\$HOME/.heroku/mongo/bin:\$PATH\"" > $build_dir/.profile.d/mongo.sh
+
+# Additional debug information
+echo "MongoDB binaries installed. PATH updated."
