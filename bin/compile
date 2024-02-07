@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 ####### Configure environment
+#######https://downloads.mongodb.com/compass/mongosh-2.1.3-linux-x64.tgz
 
 set -o errexit    # always exit on error
 set -o pipefail   # don't ignore exit codes when piping output
@@ -8,37 +9,28 @@ set -o posix      # more strict failures in subshells
 # set -x          # enable debugging
 
 # Configure directories
-build_dir=$1
-cache_dir=$2
-env_dir=$3
-bp_dir=$(cd $(dirname $0); cd ..; pwd)
-heroku_dir=$build_dir/.heroku
-mkdir -p $heroku_dir/mongo
+BUILD_DIR=$1
+HEROKU_DIR=$BUILD_DIR/.heroku
+
+mkdir -p $HEROKU_DIR/mongo/bin
 warnings=$(mktemp)
 
-# Update MongoDB version to a later version (e.g., 5.0.0 or higher)
-mongo_version="5.0.24"
+# Define MongoDB Tools version
+MONGO_TOOLS_VERSION="100.9.4"  # Replace with the desired version
 
-[[ $STACK = "heroku-16" ]] && os_id="ubuntu1604" || os_id="ubuntu2004"
+echo "Downloading MongoDB Database Tools version $MONGO_TOOLS_VERSION ..."
 
-# Echo the os_id for debugging
-echo "Determined OS ID: $os_id"
+# Download and extract MongoDB Database Tools
+MONGO_TOOLS_FILE="mongodb-database-tools-ubuntu1804-x86_64-${MONGO_TOOLS_VERSION}.tgz"  # Update based on the OS and version
+DOWNLOAD_URL="https://fastdl.mongodb.org/tools/db/${MONGO_TOOLS_FILE}"
+curl -f -s -o /tmp/mongodb-tools.tgz "${DOWNLOAD_URL}" || { echo "Download failed! Exiting."; exit 1; }
+tar xzf /tmp/mongodb-tools.tgz -C /tmp || { echo "Extraction failed! Exiting."; exit 1; }
 
-file_name="mongodb-linux-x86_64-${os_id}-${mongo_version}.tgz"
-folder_name=$(echo "$file_name" | sed 's/\.tgz$//')
-download_url="https://fastdl.mongodb.org/linux/${file_name}"
+# Move MongoDB Database Tools binaries into the app directory
+mv /tmp/mongodb-database-tools-*/bin/* $HEROKU_DIR/mongo/bin/
 
-# Download and extract MongoDB binaries
-curl -f -s -o /tmp/mongodb.tgz "${download_url}" || { echo "Download failed! Exiting."; exit 1; }
-tar xzf /tmp/mongodb.tgz -C /tmp || { echo "Extraction failed! Exiting."; exit 1; }
+echo "Creating runtime environment"
+mkdir -p $BUILD_DIR/.profile.d
+echo "export PATH=\"\$HOME/.heroku/mongo/bin:\$PATH\"" > $BUILD_DIR/.profile.d/mongo.sh
 
-# Move MongoDB binaries into the app directory
-mv "/tmp/${folder_name}"/* $heroku_dir/mongo
-chmod +x $heroku_dir/mongo/bin/*
-
-echo "-----> Creating runtime environment"
-mkdir -p $build_dir/.profile.d
-echo "export PATH=\"\$HOME/.heroku/mongo/bin:\$PATH\"" > $build_dir/.profile.d/mongo.sh
-
-# Additional debug information
-echo "MongoDB binaries installed. PATH updated."
+echo "MongoDB Database Tools installation complete."
