@@ -19,17 +19,7 @@ warnings=$(mktemp)
 # Update MongoDB version to a later version (e.g., 5.0.0 or higher)
 mongo_version="5.0.0"
 
-# Determine OS based on Heroku stack
-if [[ $STACK == "heroku-18" ]]; then
-    os_id="ubuntu1804"
-elif [[ $STACK == "heroku-20" ]]; then
-    os_id="ubuntu2004"
-elif [[ $STACK == "heroku-22" ]]; then
-    os_id="ubuntu2204"
-else
-    echo "Unsupported stack: $STACK"
-    exit 1
-fi
+[[ $STACK = "heroku-16" ]] && os_id="ubuntu1604" || os_id="ubuntu2004"
 
 # Echo the os_id for debugging
 echo "Determined OS ID: $os_id"
