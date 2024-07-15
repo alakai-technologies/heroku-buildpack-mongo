@@ -1,6 +1,6 @@
 # Heroku buildpack: MongoDB
 
-### This is necessary for creating MongoDB backups from a Heroku server, and should be added to the buildpacks for each of the Heroku servers.
+### This is necessary for creating MongoDB backups from a Heroku server, and should be added to the buildpacks for each of the Heroku servers. This must be kept public in order to execute.
 
 This is a [Heroku buildpack](http://devcenter.heroku.com/articles/buildpacks) to run mongo commands (http://www.mongodb.org/).
 
